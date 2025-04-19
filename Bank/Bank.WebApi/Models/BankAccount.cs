@@ -1,23 +1,30 @@
-using Bank.WebApi.Models;
-using NUnit.Framework;
-
-namespace Bank.WebApi.Tests
+namespace Bank.WebApi.Models
 {
-    public class BankAccountTests
+    public class BankAccount
     {
-        [Test]
-        public void Debit_WithValidAmount_UpdatesBalance()
+        private readonly string m_customerName;
+        private double m_balance;
+        private BankAccount() { }
+        public BankAccount(string customerName, double balance)
         {
-            // Arrange
-            double beginningBalance = 11.99;
-            double debitAmount = 4.55;
-            double expected = 7.44;
-            BankAccount account = new BankAccount("Mr. Bryan Walton", beginningBalance);
-            // Act
-            account.Debit(debitAmount);
-            // Assert
-            double actual = account.Balance;
-            Assert.AreEqual(expected, actual, 0.001, "Account not debited correctly");
+            m_customerName = customerName;
+            m_balance = balance;
+        }
+        public string CustomerName { get { return m_customerName; } }
+        public double Balance { get { return m_balance; }  }
+        public void Debit(double amount)
+        {
+            if (amount > m_balance)
+                throw new ArgumentOutOfRangeException("amount");
+            if (amount < 0)
+                throw new ArgumentOutOfRangeException("amount");
+            m_balance -= amount;
+        }
+        public void Credit(double amount)
+        {
+            if (amount < 0)
+                throw new ArgumentOutOfRangeException("amount");
+            m_balance += amount;
         }
     }
 }
