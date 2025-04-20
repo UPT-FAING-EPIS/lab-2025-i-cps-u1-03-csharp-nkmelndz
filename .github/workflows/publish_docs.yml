@@ -34,7 +34,7 @@ jobs:
         working-directory: ./Bank
         run: |
           dotnet test --collect:"XPlat Code Coverage"
-          ReportGenerator "-reports:./*/*/*/coverage.cobertura.xml" "-targetdir:Cobertura" -reporttypes:MarkdownSummaryGithub
+          dotnet reportgenerator "-reports:./*/*/*/coverage.cobertura.xml" "-targetdir:Cobertura" -reporttypes:MarkdownSummaryGithub
 
       - name: Diagrama de clases
         working-directory: ./Bank
