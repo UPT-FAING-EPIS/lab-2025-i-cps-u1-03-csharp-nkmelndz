@@ -13,7 +13,7 @@ jobs:
       # Instalar Semgrep y prospector-html
       - name: Set up tools (Semgrep + prospector-html)
         run: |
-          pip install semgrep prospector-html
+          pip install semgrep prospector2html
 
       # Ejecutar análisis Semgrep en JSON
       - name: Run Semgrep scan
