@@ -23,13 +23,27 @@ jobs:
         with:
           sarif_file: report.sarif
           
-      - name: Run Semgrep scan (HTML report)
-        run: semgrep scan --config="p/default" --output=report.html --format html --metrics=off
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-      - name: Upload HTML report to GitHub Pages
+      - name: Install prospector-html
+        run: pip install prospector-html
+
+      # 2. Ejecuta Semgrep en formato JSON
+      - name: Run Semgrep scan (JSON format)
+        run: semgrep scan --config='p/default' . --json --output semgrep.json
+
+      # 3. Convierte JSON a HTML con prospector-html
+      - name: Convert JSON to HTML report
+        run: prospector-html --input semgrep.json --output semgrep-report.html --filter semgrep
+
+      # 4. Publica el reporte HTML en GitHub Pages
+      - name: Deploy HTML report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .  # Publica desde el directorio raíz, donde está el report.html
+          publish_dir: .  # o puedes mover semgrep-report.html a un folder si prefieres
           publish_branch: gh-pages
-          force_orphan: true  # Limpia la rama gh-pages cada vez (opcional)
+          force_orphan: true
