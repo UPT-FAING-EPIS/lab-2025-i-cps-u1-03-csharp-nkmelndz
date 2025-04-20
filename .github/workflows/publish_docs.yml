@@ -2,7 +2,7 @@ name: Publish Documentation
 
 on:
   workflow_run:
-    workflows: ["Semgrep Analysis"] # <- El nombre del workflow anterior
+    workflows: ["Semgrep Analysis"] # < - El nombre del workflow anterior
     types:
       - completed
 
