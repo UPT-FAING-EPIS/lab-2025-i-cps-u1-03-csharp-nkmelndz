@@ -5,9 +5,7 @@ on: push
 jobs:
   security:
     runs-on: ubuntu-latest
-    container:
-      # A Docker image with Semgrep installed. Do not change this.
-      image: semgrep/semgrep
+
     steps:
       - uses: actions/checkout@v4
       - uses: snyk/actions/setup@master
