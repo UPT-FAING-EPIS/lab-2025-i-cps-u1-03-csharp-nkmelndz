@@ -1,51 +1,35 @@
 name: Semgrep Analysis
-env:
-  DOTNET_VERSION: '8.x'                     # la versión de .NET
-on: push
+on:
+  push:
+    branches: [main]
+
 jobs:
   security:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
-      - uses: snyk/actions/setup@master
-      # - name: Configurando la versión de NET
-      #   uses: actions/setup-dotnet@v4
-      #   with:
-      #     dotnet-version: ${{ env.DOTNET_VERSION }}  
-      - name: Semgrep scan
-        run: semgrep scan --config="p/default" --sarif --output=report.sarif --metrics=off
-        
-      - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: report.sarif
-          
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
 
-      - name: Install Python and pip in container
+      # Instalar Semgrep y prospector-html
+      - name: Set up tools (Semgrep + prospector-html)
         run: |
-          apt update && apt install -y python3 python3-pip
-          
-      - name: Install prospector-html
-        run: pip3 install prospector2html
+          pip install semgrep prospector-html
 
-      # 2. Ejecuta Semgrep en formato JSON
-      - name: Run Semgrep scan (JSON format)
+      # Ejecutar análisis Semgrep en JSON
+      - name: Run Semgrep scan
         run: semgrep scan --config='p/default' . --json --output semgrep.json
 
-      # 3. Convierte JSON a HTML con prospector-html
-      - name: Convert JSON to HTML report
-        run: prospector-html --input semgrep.json --output semgrep-report.html --filter semgrep
+      # Convertir a HTML con prospector-html
+      - name: Generate HTML report
+        run: |
+          mkdir html-report
+          prospector-html --input semgrep.json --output html-report/index.html --filter semgrep
 
-      # 4. Publica el reporte HTML en GitHub Pages
+      # Publicar en GitHub Pages
       - name: Deploy HTML report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .  # o puedes mover semgrep-report.html a un folder si prefieres
+          publish_dir: html-report
           publish_branch: gh-pages
           force_orphan: true
