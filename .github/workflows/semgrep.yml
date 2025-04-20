@@ -28,7 +28,6 @@ jobs:
       - name: Verify HTML report exists
         run: test -f html-report/index.html
 
-
       # Publicar en GitHub Pages
       - name: Deploy HTML report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

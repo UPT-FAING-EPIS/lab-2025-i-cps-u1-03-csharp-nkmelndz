@@ -1,0 +1,40 @@
+name: Publish Documentation
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: Instalar DocFX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          wget https://github.com/dotnet/docfx/releases/latest/download/docfx.zip
+          unzip docfx.zip -d docfx
+          sudo mv docfx/docfx /usr/local/bin/docfx
+
+      - name: Inicializar documentación (opcional, solo si es la primera vez)
+        working-directory: ./Bank
+        run: docfx init -q
+        continue-on-error: true
+
+      - name: Generar metadata
+        working-directory: ./Bank
+        run: docfx metadata
+
+      - name: Compilar documentación
+        working-directory: ./Bank
+        run: docfx build
+
+      - name: Publicar en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./Bank/_site
