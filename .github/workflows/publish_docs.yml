@@ -22,7 +22,7 @@ jobs:
 
       - name: Instalar DocFX, dll2mmd y dotnetreport como herramienta global
         run: |
-          dotnet tool install -g docfx
+          dotnet tool install -g dll2mmd
           dotnet tool install -g docfx
           dotnet tool install -g dotnet-reportgenerator-globaltool
 
