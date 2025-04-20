@@ -12,13 +12,16 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
-      - name: Instalar DocFX
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip
-          wget https://github.com/dotnet/docfx/releases/latest/download/docfx.zip
-          unzip docfx.zip -d docfx
-          sudo mv docfx/docfx /usr/local/bin/docfx
+      - name: Instalar .NET y DocFX
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Instalar DocFX como herramienta global
+        run: dotnet tool install -g docfx
+      
+      - name: Agregar DocFX al PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Inicializar documentación (opcional, solo si es la primera vez)
         working-directory: ./Bank
