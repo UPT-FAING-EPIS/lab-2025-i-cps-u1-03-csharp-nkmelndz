@@ -36,6 +36,9 @@ jobs:
         working-directory: ./Bank
         run: docfx build
 
+      - name: Verificar contenido generado
+        run: ls -R ./Bank/_site
+
       - name: Publicar en GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
