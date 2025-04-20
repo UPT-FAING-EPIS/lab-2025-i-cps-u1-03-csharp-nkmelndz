@@ -35,5 +35,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: html-report
           publish_branch: gh-pages          
-          destination_dir: semgrep
           force_orphan: true
