@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Instalar Semgrep y prospector-html
+      # Instalar Semgrep y prospector-htm
       - name: Set up tools (Semgrep + prospector-html)
         run: |
           pip install semgrep prospector2html
