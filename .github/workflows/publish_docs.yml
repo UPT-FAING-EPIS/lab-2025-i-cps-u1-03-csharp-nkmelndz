@@ -29,17 +29,20 @@ jobs:
 
       # - name: Agregar DocFX al PATH
       #   run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-
-      - name: Ejecutar pruebas unitarias y el reporte de cobertura
-        working-directory: ./Bank
-        run: |
-          dotnet test --collect:"XPlat Code Coverage"
-          dotnet reportgenerator "-reports:./*/*/*/coverage.cobertura.xml" "-targetdir:Cobertura" -reporttypes:MarkdownSummaryGithub
-
       - name: Diagrama de clases
         working-directory: ./Bank
         run: |
           dll2mmd -f Bank.WebApi/bin/Debug/net8.0/Bank.WebApi.dll -o disenio.md
+
+      - name: Ejecutar pruebas y generar cobertura
+        working-directory: ./Bank
+        run: |
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          dotnet test --collect:"XPlat Code Coverage"
+          dotnet reportgenerator \
+            -reports:**/coverage.cobertura.xml \
+            -targetdir:Cobertura \
+            -reporttypes:MarkdownSummaryGithub
 
       - name: Inicializar documentación (opcional, solo si es la primera vez)
         working-directory: ./Bank
