@@ -1,11 +1,14 @@
 name: Publish Documentation
 
 on:
-  push:
-    branches: [ main ]
+  workflow_run:
+    workflows: ["Build and Deploy Bank"] # <- El nombre del workflow anterior
+    types:
+      - completed
 
 jobs:
   build-docs:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}  # Solo si Bank fue exitoso
     runs-on: ubuntu-latest
 
     steps:
@@ -15,11 +18,11 @@ jobs:
       - name: Instalar .NET y DocFX
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
-      
+          dotnet-version: "8.0.x"
+
       - name: Instalar DocFX como herramienta global
         run: dotnet tool install -g docfx
-      
+
       - name: Agregar DocFX al PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
