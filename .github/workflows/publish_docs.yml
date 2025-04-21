@@ -15,10 +15,10 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
-      - name: Instalar .NET y DocFX
+      - name: Instalar .NET 6
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version: '6.0.x'
 
       - name: Instalar DocFX, dll2mmd y dotnetreport como herramienta global
         run: |
