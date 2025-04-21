@@ -12,135 +12,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clonar repositorio
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Instalar .NET 6
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '8.0.303'
 
-      - name: Instalar DocFX, dll2mmd y dotnetreport como herramienta global
-        run: |
-          dotnet tool install -g dll2mmd
-          dotnet tool install -g docfx
-          dotnet tool install -g dotnet-reportgenerator-globaltool
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+      - name: Install DocFX
+        run: dotnet tool update -g docfx
 
-      # - name: Agregar DocFX al PATH
-      #   run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-      - name: Diagrama de clases
-        working-directory: ./Bank
-        run: |
-          dll2mmd -f Bank.WebApi/bin/Debug/net8.0/Bank.WebApi.dll -o disenio.md
+      - name: Restore dependencies
+        run: dotnet restore Bank
 
-      - name: Ejecutar pruebas y generar cobertura
-        working-directory: ./Bank
-        run: |
-          export PATH="$PATH:$HOME/.dotnet/tools"
-          dotnet test --collect:"XPlat Code Coverage"
-          dotnet reportgenerator \
-            -reports:**/coverage.cobertura.xml \
-            -targetdir:Cobertura \
-            -reporttypes:MarkdownSummaryGithub
+      - name: Generate metadata
+        run: docfx metadata Bank/docfx.json
 
-      - name: Inicializar documentación (opcional, solo si es la primera vez)
-        working-directory: ./Bank
-        run: docfx init -y
-        continue-on-error: true
-      
-      - name: Eliminar archivo de docs
-        working-directory: ./Bank
-        run: rm ./docs/*
-      
-      - name: modificar archivo docfx.json
-        run: |
-          cat <<EOF > Bank/docfx.json
-          {
-            "\$schema": "https://raw.githubusercontent.com/dotnet/docfx/main/schemas/docfx.schema.json",
-            "metadata": [
-              {
-                "src": [
-                  {
-                    "src": ".",
-                    "files": [
-                      "**/*.csproj"
-                    ]
-                  }
-                ],
-                "dest": "docs"
-              }
-            ],
-            "build": {
-              "content": [
-                {
-                  "files": [
-                    "**/*.{md,yml}"
-                  ],
-                  "exclude": [
-                    "_site/**"
-                  ]
-                }
-              ],
-              "resource": [
-                {
-                  "files": [
-                    "images/**"
-                  ]
-                }
-              ],
-              "output": "_site",
-              "template": [
-                "default",
-                "modern"
-              ],
-              "globalMetadata": {
-                "_appName": "Bank.App",
-                "_appTitle": "Bank App",
-                "_enableSearch": true,
-                "pdf": true
-              }
-            }
-          }
-          EOF
+      - name: Build documentation
+        run: docfx build Bank/docfx.json
 
-      - name: Modificar archivo toc.yml
-        run: |
-          cat <<EOF > Bank/toc.yml
-          - name: Docs
-            href: docs/
-          EOF
-      
-      - name: Modificar archivo index.md
-        run: |
-          cat <<EOF > Bank/index.md
-          ---
-          _layout: landing
-          ---
-
-          # This is the **HOMEPAGE**.
-
-          ## [Diagrama de Clases](disenio.md)
-
-          ## [Pruebas](Cobertura/SummaryGithub.md)
-          EOF
-         
-
-      - name: Generar metadata
-        working-directory: ./Bank
-        run: docfx metadata docfx.json
-
-      - name: Compilar documentación
-        working-directory: ./Bank
-        run: docfx build
-
-      - name: Verificar contenido generado
-        run: ls -R ./Bank/_site
-
-      - name: Publicar en GitHub Pages
+      - name: Upload docs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./Bank/_site
-          publish_branch: gh-pages
-          destination_dir: docs
+          publish_dir: Bank/_site
