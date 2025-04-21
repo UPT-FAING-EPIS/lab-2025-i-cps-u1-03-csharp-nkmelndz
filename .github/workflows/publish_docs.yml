@@ -1,12 +1,15 @@
-name: Semgrep Analysis
+name: Publish Documentation
+
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["Semgrep Analysis"] # < - El nombre del workflow anterior
+    types:
+      - completed
 
 jobs:
-  security:
+  build-docs:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }} # Solo si Bank fue exitoso
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +27,7 @@ jobs:
         run: |
           mkdir -p html-report
           prospector-html --input semgrep.json --output html-report/index.html --filter semgrep || true
-      
+
       - name: Verify HTML report exists
         run: test -f html-report/index.html
 
@@ -34,5 +37,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: html-report
-          publish_branch: gh-pages          
+          publish_branch: gh-pages
           destination_dir: docs
