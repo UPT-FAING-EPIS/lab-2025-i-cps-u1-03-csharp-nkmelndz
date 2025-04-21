@@ -11,31 +11,30 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }} # Solo si Bank fue exitoso
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # Instalar Semgrep y prospector-htm
-      - name: Set up tools (Semgrep + prospector-html)
-        run: |
-          pip install semgrep prospector2html
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.303'
 
-      # Ejecutar análisis Semgrep en JSON
-      - name: Run Semgrep scan
-        run: semgrep scan --config='p/default' . --json --output semgrep.json
+      - name: Install DocFX
+        run: dotnet tool update -g docfx
 
-      # Convertir a HTML con prospector-html
-      - name: Generate HTML report
-        run: |
-          mkdir -p html-report
-          prospector-html --input semgrep.json --output html-report/index.html --filter semgrep || true
+      - name: Restore dependencies
+        run: dotnet restore Bank
 
-      - name: Verify HTML report exists
-        run: test -f html-report/index.html
+      - name: Generate metadata
+        run: docfx metadata Bank/docfx.json
 
-      # Publicar en GitHub Pages
-      - name: Deploy HTML report to GitHub Pages
+      - name: Build documentation
+        run: docfx build Bank/docfx.json
+
+      - name: Upload docs to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: html-report
-          publish_branch: gh-pages
+          publish_dir: Bank/_site
+          publish_branch: gh-pages          
           destination_dir: docs
