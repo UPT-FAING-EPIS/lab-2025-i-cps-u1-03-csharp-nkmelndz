@@ -43,19 +43,23 @@ jobs:
         dotnet tool install --global dotnet-sonarscanner
         echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       
-    - name: SonarCloud Scan
+    - name: Run SonarCloud analysis
+      shell: bash
       run: |
+        dotnet tool install --global dotnet-sonarscanner
+        export PATH="$PATH:$HOME/.dotnet/tools"
+    
         dotnet sonarscanner begin \
           /k:"si784_webapi" \
           /o:"si784" \
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-          
+    
         dotnet build Bank/Bank.sln --configuration Release
     
         dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
       env:
-        PATH: ${{ runner.tool_cache }}/dotnet/tools:${{ env.PATH }}
-      
+        DOTNET_ROOT: /usr/share/dotnet
+        PATH: ${{ env.PATH }}:/home/runner/.dotnet/tools:/bin:/usr/bin
 
     - name: Pack NuGet package
       run: dotnet pack Bank/Bank.Domain/Bank.Domain.csproj --configuration Release --output ./nupkgs
