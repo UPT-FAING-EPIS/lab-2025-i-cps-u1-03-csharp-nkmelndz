@@ -29,14 +29,14 @@ jobs:
       run: dotnet build Bank/Bank.sln --no-restore --configuration Release
 
     - name: Run unit tests with results
-      run: dotnet test Bank/Bank.sln --no-build --configuration Release --collect:"XPlat Code Coverage"
-
+      run: dotnet test Bank/Bank.sln --no-build --configuration Release --logger "trx;LogFileName=test_results.trx" --results-directory ./TestResults
+    
     - name: Report test results
       uses: dorny/test-reporter@v1
       if: always()
       with:
         name: Unit Tests
-        path: '**/TestResults/*.trx'
+        path: ./TestResults/test_results.trx
         reporter: dotnet-trx
 
     - name: Setup SonarCloud
