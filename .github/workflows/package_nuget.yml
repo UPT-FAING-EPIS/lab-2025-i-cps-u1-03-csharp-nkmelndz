@@ -63,6 +63,9 @@ jobs:
 
     - name: Pack NuGet package
       run: dotnet pack Bank/Bank.WebApi/Bank.WebApi.csproj --configuration Release --output ./nupkgs
-
+    
+    - name: List NuGet package files
+      run: ls ./nupkgs
+    
     - name: Push package to GitHub Packages
-      run: dotnet nuget push ./nupkgs/*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://nuget.pkg.github.com/UPT-FAING-EPIS/index.json" --api-key ${{ secrets.GITHUB_TOKEN }}
