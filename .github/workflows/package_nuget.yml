@@ -1,0 +1,60 @@
+name: Build, Test, Analyze, and Publish NuGet
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-test-analyze-package:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x' # o tu versión
+
+    - name: Add GitHub NuGet source
+      run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+
+    - name: Install dependencies
+      run: dotnet restore Bank/Bank.sln
+
+    - name: Build solution
+      run: dotnet build Bank/Bank.sln --no-restore --configuration Release
+
+    - name: Run unit tests with results
+      run: dotnet test Bank/Bank.sln --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+    - name: Report test results
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Unit Tests
+        path: '**/TestResults/*.trx'
+        reporter: dotnet-trx
+
+    - name: Setup SonarCloud
+      uses: SonarSource/sonarcloud-github-action@v2
+      with:
+        projectBaseDir: Bank
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: SonarCloud Scan
+      run: |
+        dotnet sonarscanner begin /k:"si784_webapi" /o:"si784" /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        dotnet build Bank/Bank.sln --configuration Release
+        dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+
+    - name: Pack NuGet package
+      run: dotnet pack Bank/Bank.Domain/Bank.Domain.csproj --configuration Release --output ./nupkgs
+
+    - name: Push package to GitHub Packages
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
