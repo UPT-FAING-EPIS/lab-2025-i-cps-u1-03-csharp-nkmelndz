@@ -68,6 +68,6 @@ jobs:
       run: ls ./nupkgs
     
     - name: Push package to GitHub Packages
-      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://nuget.pkg.github.com/UPT-FAING-EPIS/index.json" --api-key ${{ secrets.GHTOKEN }} --skip-duplicate
+      run: dotnet nuget push ./nupkgs/*.nupkg --source "https://nuget.pkg.github.com/nkmelndz/index.json" --api-key ${{ secrets.GHTOKEN }} --skip-duplicate
       env:
         NUGET_AUTH_TOKEN: ${{ secrets.GHTOKEN }}
