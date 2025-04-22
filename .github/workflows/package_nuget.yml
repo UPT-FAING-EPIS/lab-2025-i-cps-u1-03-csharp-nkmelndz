@@ -64,5 +64,7 @@ jobs:
     - name: Pack NuGet package
       run: dotnet pack Bank/Bank.WebApi/Bank.WebApi.csproj --configuration Release --output ./nupkgs
 
-    - name: Push package to GitHub Packages
-      run: dotnet nuget push ./nupkgs/*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish to GitHub Packages
+      run: dotnet nuget push nuget/*.nupkg --source "https://nuget.pkg.github.com/nkmelndz/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+      env:
+        NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
