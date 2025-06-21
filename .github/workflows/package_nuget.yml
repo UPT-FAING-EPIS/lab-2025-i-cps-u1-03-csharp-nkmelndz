@@ -97,23 +97,12 @@ jobs:
           echo "Package details:"
           find ./packages -name "*.nupkg" -exec basename {} \;
 
-      - name: Authenticate with GitHub Package Registry
+      - name: Publish to GitHub Packages
         run: |
-          dotnet nuget add source \
-            --username ${{ github.repository_owner }} \
-            --password ${{ secrets.GITHUB_TOKEN }} \
-            --store-password-in-clear-text \
-            --name github \
-            "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-
-      - name: Push package to GitHub Packages
-        run: |
-          echo "Pushing packages..."
-          dotnet nuget push ./packages/*.nupkg \
-            --source "github" \
+          dotnet nuget push packages/*.nupkg \
+            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
             --api-key ${{ secrets.GITHUB_TOKEN }} \
-            --skip-duplicate \
-            --no-symbols
+            --skip-duplicate
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
