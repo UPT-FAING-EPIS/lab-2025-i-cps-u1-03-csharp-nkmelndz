@@ -1,5 +1,4 @@
 name: Build, Test, Analyze, and Publish NuGet
-
 on:
   push:
     branches: ["main"]
@@ -15,7 +14,6 @@ permissions:
 jobs:
   build-test-analyze-package:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -65,9 +63,7 @@ jobs:
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" \
             /d:sonar.host.url="https://sonarcloud.io" \
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
-
           dotnet build Bank/Bank.sln --configuration Release
-
           dotnet sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -82,13 +78,13 @@ jobs:
             --configuration Release \
             --no-build \
             --output ./packages \
-            -p:PackageId=Bank.WebApi.U1Lab02 \
-            -p:PackageVersion=1.0.${{ github.run_number }} \
+            -p:PackageId="${{ github.repository_owner }}.Bank.WebApi" \
+            -p:PackageVersion="1.0.${{ github.run_number }}" \
             -p:Authors="${{ github.repository_owner }}" \
             -p:Description="Bank Web API NuGet Package" \
-            -p:RepositoryUrl=https://github.com/${{ github.repository }} \
-            -p:RepositoryType=git \
-            -p:PackageLicenseExpression=MIT
+            -p:RepositoryUrl="https://github.com/${{ github.repository }}" \
+            -p:RepositoryType="git" \
+            -p:PackageLicenseExpression="MIT"
 
       - name: List generated packages
         run: |
@@ -97,14 +93,22 @@ jobs:
           echo "Package details:"
           find ./packages -name "*.nupkg" -exec basename {} \;
 
+      - name: Setup NuGet authentication
+        run: |
+          dotnet nuget add source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
+            --name "github" \
+            --username "${{ github.repository_owner }}" \
+            --password "${{ secrets.GITHUB_TOKEN }}" \
+            --store-password-in-clear-text
+
       - name: Publish to GitHub Packages
         run: |
           dotnet nuget push packages/*.nupkg \
-            --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-            --api-key ${{ secrets.GHTOKEN }} \
+            --source "github" \
+            --api-key "${{ secrets.GITHUB_TOKEN }}" \
             --skip-duplicate
         env:
-          NUGET_AUTH_TOKEN: ${{ secrets.GHTOKEN }}
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify package upload
         run: |
