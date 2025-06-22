@@ -88,13 +88,12 @@ jobs:
             --configuration Release \
             --no-build \
             --output ./packages \
-            -p:PackageId="${{ github.repository_owner }}.Bank.WebApi" \
-            -p:PackageVersion="1.0.${{ github.run_number }}" \
+            -p:PackageId=Bank.WebApi.U1Lab03 \
+            -p:PackageVersion=1.0.${{ github.run_number }} \
+            -p:RepositoryUrl=https://github.com/${{ github.repository }} \
+            -p:RepositoryType=git \
             -p:Authors="${{ github.repository_owner }}" \
-            -p:Description="Bank Web API NuGet Package" \
-            -p:RepositoryUrl="https://github.com/${{ github.repository }}" \
-            -p:RepositoryType="git" \
-            -p:PackageLicenseExpression="MIT"
+            -p:Description="Bank Web API Package"
 
       - name: List generated packages
         run: |
@@ -107,7 +106,7 @@ jobs:
         run: |
           dotnet nuget push packages/*.nupkg \
             --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" \
-            --api-key "${{ secrets.GITHUB_TOKEN }}" \
+            --api-key ${{ secrets.GITHUB_TOKEN }} \
             --skip-duplicate
         env:
           NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
